@@ -395,7 +395,15 @@ function debugLog(message) {
 
 /* Init */
 async function init() {
-  await loadProducts();
+  try {
+    await loadProducts();
+  } catch (e) {
+    console.error("Failed to load products.json", e);
+    productsContainer.innerHTML =
+      '<div class="placeholder-message">Failed to load products. Make sure you are serving the site over HTTP (not file://) and that products.json is reachable.</div>';
+    appendSystemNotice("Failed to load products.json: " + (e.message || e));
+    // still restore selection/messages so UI isn't completely dead
+  }
   restoreSelected();
   restoreMessages();
   applyFilters();

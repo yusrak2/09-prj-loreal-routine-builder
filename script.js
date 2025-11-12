@@ -70,6 +70,7 @@ function renderProducts(list = filtered) {
   productsContainer.querySelectorAll(".product-card").forEach((card) => {
     const id = Number(card.dataset.id);
     card.addEventListener("click", (e) => {
+      debugLog(`card.click id=${id} target=${e.target.tagName}`);
       // ignore clicks on details button
       if (e.target.closest(".details-btn")) return;
       toggleSelect(id, card);
@@ -78,19 +79,23 @@ function renderProducts(list = filtered) {
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
+        debugLog(`card.keydown id=${id} key=${e.key}`);
         toggleSelect(id, card);
       }
     });
 
-    const CF_WORKER_URL = "https://jolly-disk-94be.ykhan2.workers.dev/"; // your Cloudflare Worker URL
+    const detailsBtn = card.querySelector(".details-btn");
     const desc = card.querySelector(".desc");
-    detailsBtn.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      const expanded = detailsBtn.getAttribute("aria-expanded") === "true";
-      detailsBtn.setAttribute("aria-expanded", String(!expanded));
-      desc.setAttribute("aria-hidden", String(expanded));
-      card.classList.toggle("expanded");
-    });
+    if (detailsBtn) {
+      detailsBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        debugLog(`details.click id=${id}`);
+        const expanded = detailsBtn.getAttribute("aria-expanded") === "true";
+        detailsBtn.setAttribute("aria-expanded", String(!expanded));
+        desc.setAttribute("aria-hidden", String(expanded));
+        card.classList.toggle("expanded");
+      });
+    }
   });
 }
 
@@ -121,36 +126,15 @@ function renderSelected() {
 
 function toggleSelect(id, cardEl) {
   if (selectedIds.has(id)) {
-    deselect(id);
+    selectedIds.delete(id);
+    if (cardEl) cardEl.classList.remove("selected");
   } else {
-    card.addEventListener("click", (e) => {
-      debugLog(`card.click id=${id} target=${e.target.tagName}`);
-      // ignore clicks on details button
-      if (e.target.closest(".details-btn")) {
-        debugLog(`click on details button for id=${id}`);
-        return;
-      }
-      toggleSelect(id, card);
-    });
+    selectedIds.add(id);
+    if (cardEl) cardEl.classList.add("selected");
   }
-
-  if (e.key === "Enter" || e.key === " ") {
-    e.preventDefault();
-    debugLog(`card.keydown id=${id} key=${e.key}`);
-    toggleSelect(id, card);
-  }
-  if (el) el.classList.remove("selected");
   persistSelected();
   renderSelected();
 }
-detailsBtn.addEventListener("click", (ev) => {
-  ev.stopPropagation();
-  debugLog(`details.click id=${id}`);
-  const expanded = detailsBtn.getAttribute("aria-expanded") === "true";
-  detailsBtn.setAttribute("aria-expanded", String(!expanded));
-  desc.setAttribute("aria-hidden", String(expanded));
-  card.classList.toggle("expanded");
-});
 
 /* Filtering */
 function applyFilters() {

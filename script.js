@@ -57,7 +57,7 @@ function renderProducts(list = filtered) {
         <div class="product-info">
           <h3>${escapeHtml(p.name)}</h3>
           <p>${escapeHtml(p.brand)}</p>
-          <button class="details-btn" data-action="toggle-desc" aria-expanded="false">Details</button>
+          <button type="button" class="details-btn" data-action="toggle-desc" aria-expanded="false">Details</button>
           <div class="desc" aria-hidden="true">${escapeHtml(
             p.description
           )}</div>

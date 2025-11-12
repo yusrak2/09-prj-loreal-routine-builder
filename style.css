@@ -206,6 +206,15 @@ body {
   min-height: 160px;
 }
 
+.product-card {
+  cursor: pointer;
+  transition: box-shadow 180ms ease, transform 120ms ease;
+  touch-action: manipulation;
+}
+.product-card:hover {
+  transform: translateY(-3px);
+}
+
 .product-card img {
   width: 110px;
   height: 110px;
@@ -259,6 +268,10 @@ body {
   border: 1px solid #ccc;
   background: #fff;
   cursor: pointer;
+}
+
+.product-card .details-btn:focus {
+  outline: 2px solid #0b76ef;
 }
 
 /* selected products */

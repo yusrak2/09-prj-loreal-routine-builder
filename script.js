@@ -123,28 +123,34 @@ function toggleSelect(id, cardEl) {
   if (selectedIds.has(id)) {
     deselect(id);
   } else {
-    selectedIds.add(id);
-    if (cardEl) cardEl.classList.add("selected");
+    card.addEventListener("click", (e) => {
+      debugLog(`card.click id=${id} target=${e.target.tagName}`);
+      // ignore clicks on details button
+      if (e.target.closest(".details-btn")) {
+        debugLog(`click on details button for id=${id}`);
+        return;
+      }
+      toggleSelect(id, card);
+    });
   }
-  persistSelected();
-  renderSelected();
-}
 
-function deselect(id) {
-  selectedIds.delete(id);
-  // update card class
-  const el = productsContainer.querySelector(`.product-card[data-id="${id}"]`);
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    debugLog(`card.keydown id=${id} key=${e.key}`);
+    toggleSelect(id, card);
+  }
   if (el) el.classList.remove("selected");
   persistSelected();
   renderSelected();
 }
-
-function clearAllSelected() {
-  selectedIds.clear();
-  persistSelected();
-  renderProducts();
-  renderSelected();
-}
+detailsBtn.addEventListener("click", (ev) => {
+  ev.stopPropagation();
+  debugLog(`details.click id=${id}`);
+  const expanded = detailsBtn.getAttribute("aria-expanded") === "true";
+  detailsBtn.setAttribute("aria-expanded", String(!expanded));
+  desc.setAttribute("aria-hidden", String(expanded));
+  card.classList.toggle("expanded");
+});
 
 /* Filtering */
 function applyFilters() {
@@ -352,6 +358,39 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+/* Debug helper: on-page and console logging to diagnose UI issues */
+function debugLog(message) {
+  try {
+    console.log("[DEBUG]", message);
+    let dbg = document.getElementById("debugLog");
+    if (!dbg) {
+      dbg = document.createElement("div");
+      dbg.id = "debugLog";
+      dbg.setAttribute("aria-hidden", "true");
+      dbg.style.position = "fixed";
+      dbg.style.right = "12px";
+      dbg.style.bottom = "12px";
+      dbg.style.maxWidth = "320px";
+      dbg.style.maxHeight = "200px";
+      dbg.style.overflow = "auto";
+      dbg.style.background = "rgba(0,0,0,0.75)";
+      dbg.style.color = "#fff";
+      dbg.style.fontSize = "12px";
+      dbg.style.padding = "8px";
+      dbg.style.borderRadius = "8px";
+      dbg.style.zIndex = "9999";
+      document.body.appendChild(dbg);
+    }
+    const line = document.createElement("div");
+    line.textContent = new Date().toLocaleTimeString() + " — " + message;
+    dbg.appendChild(line);
+    // cap lines
+    while (dbg.childNodes.length > 40) dbg.removeChild(dbg.firstChild);
+  } catch (e) {
+    console.log("[DEBUG-ERR]", e);
+  }
 }
 
 /* Init */

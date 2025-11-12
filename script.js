@@ -82,7 +82,7 @@ function renderProducts(list = filtered) {
       }
     });
 
-    const detailsBtn = card.querySelector(".details-btn");
+    const CF_WORKER_URL = "https://jolly-disk-94be.ykhan2.workers.dev/"; // your Cloudflare Worker URL
     const desc = card.querySelector(".desc");
     detailsBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();

@@ -2,7 +2,19 @@
 // Deploy this file as a Cloudflare Worker and set the secret OPENAI_API_KEY
 // Bind the secret to the worker environment as OPENAI_API_KEY.
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
 addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.method === "OPTIONS") {
+    // Handle CORS preflight
+    event.respondWith(new Response(null, { headers: CORS_HEADERS }));
+    return;
+  }
   event.respondWith(handle(event.request));
 });
 
@@ -68,11 +80,14 @@ and short warnings if ingredients may interact.`;
     const openaiData = await openaiResp.json();
     const reply = openaiData.choices?.[0]?.message?.content || "";
 
-    // Return a simple JSON structure the client expects.
+    // Return a simple JSON structure the client expects, include CORS headers for browser calls.
     return new Response(JSON.stringify({ reply }), {
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...CORS_HEADERS },
     });
   } catch (err) {
-    return new Response("Worker error: " + String(err), { status: 500 });
+    return new Response("Worker error: " + String(err), {
+      status: 500,
+      headers: CORS_HEADERS,
+    });
   }
 }

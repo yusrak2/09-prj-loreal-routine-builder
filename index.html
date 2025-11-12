@@ -25,8 +25,15 @@
 
       <!-- Category Filter -->
       <div class="search-section">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search products, ingredients, benefits..."
+          aria-label="Search products"
+        />
+
         <select id="categoryFilter">
-          <option value="" disabled selected>Choose a Category</option>
+          <option value="">All categories</option>
           <option value="cleanser">Cleansers</option>
           <option value="moisturizer">Moisturizers & Treatments</option>
           <option value="haircare">Haircare</option>
@@ -37,6 +44,10 @@
           <option value="suncare">Suncare</option>
           <option value="fragrance">Fragrance</option>
         </select>
+
+        <button id="rtlToggle" class="rtl-toggle" aria-pressed="false">
+          RTL
+        </button>
       </div>
 
       <!-- Products Grid -->
@@ -45,10 +56,13 @@
       <!-- Selected Products -->
       <div class="selected-products">
         <h2>Selected Products</h2>
-        <div id="selectedProductsList"></div>
-        <button id="generateRoutine" class="generate-btn">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Routine
-        </button>
+        <div id="selectedProductsList" aria-live="polite"></div>
+        <div class="selected-actions">
+          <button id="clearSelected" class="clear-btn">Clear All</button>
+          <button id="generateRoutine" class="generate-btn">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Routine
+          </button>
+        </div>
       </div>
 
       <!------- Chat Area ------->
@@ -85,8 +99,7 @@
       </footer>
     </div>
 
-    <!-- secrets.js can be removed when using Cloudflare Workers for API requests -->
-    <script src="secrets.js"></script>
+    <!-- API key must NOT be in browser. Requests go to your Cloudflare Worker endpoint. Set CF_WORKER_URL in script.js or deploy worker and update URL. -->
     <script src="script.js"></script>
   </body>
 </html>

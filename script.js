@@ -217,12 +217,43 @@ async function sendConversation() {
       body: JSON.stringify(payload),
     });
 
-    if (!resp.ok) {
-      const text = await resp.text();
-      throw new Error("Worker error: " + text);
+    // Read response text and try to parse JSON (worker returns structured JSON on error)
+    const respText = await resp.text();
+    let respJson = null;
+    try {
+      respJson = respText ? JSON.parse(respText) : null;
+    } catch (e) {
+      respJson = null;
     }
 
-    const data = await resp.json();
+    if (!resp.ok) {
+      // Try to extract meaningful message from structured error payload
+      let errMsg = resp.statusText || `HTTP ${resp.status}`;
+      if (respJson && respJson.error) {
+        const body = respJson.error.body;
+        if (typeof body === "string") {
+          errMsg = body;
+        } else if (body && body.error && body.error.message) {
+          errMsg = body.error.message;
+        } else {
+          errMsg = JSON.stringify(body || respJson.error);
+        }
+      } else if (respJson && respJson.message) {
+        errMsg = respJson.message;
+      } else if (respText) {
+        errMsg = respText;
+      }
+
+      console.error(
+        "Worker returned error:",
+        resp.status,
+        respJson || respText
+      );
+      appendSystemNotice("API Error: " + errMsg);
+      return;
+    }
+
+    const data = respJson || {};
     // Expect data.reply (assistant text) and optional data.citations (array of {title,url})
     const assistantText = data.reply || "No response.";
     appendMessage("assistant", assistantText, data.citations || []);

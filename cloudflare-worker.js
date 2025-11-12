@@ -73,8 +73,18 @@ and short warnings if ingredients may interact.`;
     );
 
     if (!openaiResp.ok) {
-      const t = await openaiResp.text();
-      return new Response("OpenAI error: " + t, { status: 502 });
+      // Try to parse JSON error from OpenAI and surface it as structured JSON
+      let errBody;
+      try {
+        errBody = await openaiResp.json();
+      } catch (e) {
+        errBody = await openaiResp.text();
+      }
+      const payload = { error: { status: openaiResp.status, body: errBody } };
+      return new Response(JSON.stringify(payload), {
+        status: 502,
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+      });
     }
 
     const openaiData = await openaiResp.json();
